@@ -21,10 +21,11 @@ import (
 	"gopkg.in/alecthomas/kingpin.v3-unstable"
 )
 
+//nolint
 type Severity string
 
 // Linter message severity levels.
-const (
+const ( // nolint
 	Warning Severity = "warning"
 	Error   Severity = "error"
 )
@@ -410,7 +411,8 @@ func runLinters(linters map[string]*Linter, paths, ellipsisPaths []string, concu
 	errch := make(chan error, len(linters)*(len(paths)+len(ellipsisPaths)))
 	concurrencych := make(chan bool, config.Concurrency)
 	incomingIssues := make(chan *Issue, 1000000)
-	processedIssues := maybeSortIssues(maybeAggregateIssues(incomingIssues))
+	directives := newDirectiveParser(paths)
+	processedIssues := filterIssuesViaDirectives(directives, maybeSortIssues(maybeAggregateIssues(incomingIssues)))
 	wg := &sync.WaitGroup{}
 	for _, linter := range linters {
 		// Recreated in each loop because it is mutated by executeLinter().
