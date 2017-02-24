@@ -21,7 +21,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v3-unstable"
 )
 
-//nolint
+// Severity of linter message.
 type Severity string
 
 // Linter message severity levels.

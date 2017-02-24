@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"sort"
 	"strings"
+	"time"
 
 	"sync"
 )
@@ -105,15 +106,17 @@ func (a *rangeExpander) Visit(node ast.Node) ast.Visitor {
 }
 
 func (d *directiveParser) parseFile(path string) ignoredRanges {
-	debug("parsing %s for 'nolint' directives", path)
+	start := time.Now()
+	debug("nolint: parsing %s for directives", path)
 	file, err := parser.ParseFile(d.fset, path, nil, parser.ParseComments)
 	if err != nil {
-		debug("failed to parse %q: %s", path, err)
+		debug("nolint: failed to parse %q: %s", path, err)
 		return nil
 	}
 	ranges := extractCommentGroupRange(d.fset, file.Comments...)
 	visitor := &rangeExpander{fset: d.fset, ranges: ranges}
 	ast.Walk(visitor, file)
+	debug("nolint: parsing %s took %s", path, time.Since(start))
 	return visitor.ranges
 }
 
